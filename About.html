@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+    <link rel="stylesheet" href="Design.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav>
+            <ul class="navlisst">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Memories.html">Experiences</a></li>
+                <li><a href="About.html">About</a></li>
+            </ul>
+        </nav>
+
+        <main class="center-panel">
+            <h1 class="Class">Thank You, Classmates</h1>
+            <div class="about-image-box">
+                <img class="about-photo" src="./class.jpg" alt="Classmates photo">
+            </div>
+            <p>Thank you for all the memories, laughter, support, and teamwork we shared. Every class activity, every challenge, and every fun moment made this journey more meaningful.</p>
+            <p>I will always remember the bond we built together. This project is a small way to celebrate our classmates and the moments that made our school life special.</p>
+        </main>
+    </div>
+    <div class="page-transition-overlay" aria-hidden="true"></div>
+    <button class="music-toggle" id="musicToggle" type="button">Play Music</button>
+
+    <script>
+        function initPageTransitions() {
+            const exitDuration = 30;
+            const musicToggle = document.getElementById('musicToggle');
+            let musicAudio = null;
+            function normalizeUrl(url) {
+                return new URL(url, window.location.href).href.split('#')[0].split('?')[0].replace(/\/+$/, '').toLowerCase();
+            }
+
+            function saveMusicState() {
+                if (!musicAudio) return;
+                sessionStorage.setItem('musicTime', String(musicAudio.currentTime || 0));
+            }
+
+            function startMusic() {
+                if (!musicAudio) {
+                    musicAudio = new Audio('taralets/saranggola/ben-ben-saranggola-official-lyric-video-128-ytshorts.savetube.me.mp3');
+                    musicAudio.loop = true;
+                    musicAudio.preload = 'auto';
+                    musicAudio.volume = 0.35;
+                    musicAudio.addEventListener('timeupdate', saveMusicState);
+                    musicAudio.addEventListener('pause', saveMusicState);
+                }
+                const savedTime = Number(sessionStorage.getItem('musicTime') || 0);
+                if (savedTime > 0) {
+                    musicAudio.currentTime = savedTime;
+                }
+                musicAudio.play().catch(() => {});
+                localStorage.setItem('musicEnabled', '1');
+                if (musicToggle) {
+                    musicToggle.textContent = 'Music On';
+                    musicToggle.classList.add('active');
+                }
+            }
+
+            function stopMusic() {
+                if (musicAudio) {
+                    musicAudio.pause();
+                }
+                localStorage.removeItem('musicEnabled');
+                saveMusicState();
+                if (musicToggle) {
+                    musicToggle.textContent = 'Play Music';
+                    musicToggle.classList.remove('active');
+                }
+            }
+
+            if (localStorage.getItem('musicEnabled') === '1' && musicToggle) {
+                musicToggle.textContent = 'Music On';
+                musicToggle.classList.add('active');
+            }
+
+            if (localStorage.getItem('musicEnabled') === '1') {
+                startMusic();
+            }
+
+            if (musicToggle) {
+                musicToggle.addEventListener('click', function () {
+                    if (musicAudio && !musicAudio.paused) {
+                        stopMusic();
+                    } else {
+                        startMusic();
+                    }
+                });
+            }
+
+            function goToPage(url) {
+                if (!url) return;
+                document.body.classList.add('is-navigating');
+                setTimeout(() => {
+                    window.location.href = url;
+                }, exitDuration);
+            }
+
+            document.querySelectorAll('a[href$=".html"]').forEach(link => {
+                link.addEventListener('click', function (event) {
+                    const url = link.getAttribute('href');
+                    if (!url) return;
+                    if (normalizeUrl(url) === normalizeUrl(window.location.href)) return;
+                    event.preventDefault();
+                    saveMusicState();
+                    goToPage(url);
+                });
+            });
+
+            window.addEventListener('pagehide', saveMusicState);
+            window.addEventListener('beforeunload', saveMusicState);
+        }
+
+        initPageTransitions();
+    </script>
+</body>
+</html>
